@@ -15,6 +15,7 @@ export const requestBodySchema = z.object({
 	email: z.string().email().max(EMAIL_MAX_LENGTH),
 	category: z.enum(categoryKeys),
 	body: z.string().max(BODY_MAX_LENGTH),
+	csrfToken: z.string(),
 	reCaptchaToken: z.string()
 });
 

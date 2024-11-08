@@ -75,6 +75,7 @@
 		本文
 		<textarea name="body" maxLength={data.BODY_MAX_LENGTH} disabled={isSubmitting}></textarea>
 	</label>
+	<input name="csrfToken" type="hidden" value={data.csrfToken} />
 	<button type="submit" disabled={isSubmitting}>送信</button>
 
 	<!-- ref: https://developers.google.com/recaptcha/docs/faq?hl=ja#id-like-to-hide-the-recaptcha-badge.-what-is-allowed https://developers.google.com/recaptcha/docs/faq?hl=ja#id-like-to-hide-the-recaptcha-badge.-what-is-allowed-->

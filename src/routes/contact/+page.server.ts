@@ -8,12 +8,21 @@ import {
 	requestBodySchema
 } from './schema';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
+	const { session } = locals;
+	if (session.data.csrfToken === undefined) {
+		await session.setData({
+			csrfToken: crypto.randomUUID()
+		});
+		await session.save();
+	}
+
 	return {
 		NAME_MAX_LENGTH,
 		EMAIL_MAX_LENGTH,
 		CATEGORY_OPTIONS,
-		BODY_MAX_LENGTH
+		BODY_MAX_LENGTH,
+		csrfToken: session.data.csrfToken
 	};
 };
 
@@ -31,7 +40,8 @@ function convertToObject(d: FormData): Record<string, FormDataEntryValue> {
 }
 
 export const actions = {
-	default: async ({ request }) => {
+	default: async ({ locals, request }) => {
+		const { session } = locals;
 		const rawRequestBody = convertToObject(await request.formData());
 
 		// バリデーションをかける
@@ -40,6 +50,12 @@ export const actions = {
 			return { success: false, message: 'Invalid request body' };
 		}
 		const requestBody = validationResult.data;
+
+		// CSRFトークンを検証
+		const csrfResult = requestBody.csrfToken === session.data.csrfToken;
+		if (!csrfResult) {
+			return { success: false, message: 'Invalid CSRF token' };
+		}
 
 		// reCAPTCHAを検証
 		const captchaResult = verifyCaptcha(requestBody.reCaptchaToken);
