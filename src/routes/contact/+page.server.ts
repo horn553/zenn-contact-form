@@ -1,11 +1,15 @@
 import type { Actions, PageServerLoad } from './$types';
+import { log } from './logger';
 import { verifyCaptcha } from './reCapthaVerifier';
 import {
 	NAME_MAX_LENGTH,
 	EMAIL_MAX_LENGTH,
 	CATEGORY_OPTIONS,
 	BODY_MAX_LENGTH,
-	requestBodySchema
+	requestBodySchema,
+	type ContactLog,
+	statusScheme,
+	statuses
 } from './schema';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -40,7 +44,7 @@ function convertToObject(d: FormData): Record<string, FormDataEntryValue> {
 }
 
 export const actions = {
-	default: async ({ locals, request }) => {
+	default: async ({ locals, platform, request }) => {
 		const { session } = locals;
 		const rawRequestBody = convertToObject(await request.formData());
 
@@ -51,17 +55,40 @@ export const actions = {
 		}
 		const requestBody = validationResult.data;
 
+		// id採番、受信日時取得
+		let currentStatus: (typeof statuses)[number] = 'have sent email';
+		const contactLog: ContactLog = {
+			id: crypto.randomUUID(),
+			status: statusScheme.parse(currentStatus),
+			receivedAt: new Date().toISOString(),
+			...requestBody
+		};
+
 		// CSRFトークンを検証
 		const csrfResult = requestBody.csrfToken === session.data.csrfToken;
 		if (!csrfResult) {
+			currentStatus = 'invalid csrf';
+			contactLog.status = statusScheme.parse(currentStatus);
+			log(platform?.env.DB, contactLog);
+
 			return { success: false, message: 'Invalid CSRF token' };
 		}
 
 		// reCAPTCHAを検証
 		const captchaResult = verifyCaptcha(requestBody.reCaptchaToken);
 		if (!captchaResult) {
+			currentStatus = 'invalid captcha';
+			contactLog.status = statusScheme.parse(currentStatus);
+			log(platform?.env.DB, contactLog);
+
 			return { success: false, message: 'Invalid CAPTCHA token' };
 		}
+
+		// TODO: メールを送信
+
+		currentStatus = 'have sent email';
+		contactLog.status = statusScheme.parse(currentStatus);
+		log(platform?.env.DB, contactLog);
 
 		return { success: true };
 	}

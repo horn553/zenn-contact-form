@@ -18,5 +18,15 @@ export const requestBodySchema = z.object({
 	csrfToken: z.string(),
 	reCaptchaToken: z.string()
 });
-
 export type RequestBody = z.infer<typeof requestBodySchema>;
+
+export const statuses = ['invalid csrf', 'invalid captcha', 'have sent email'] as const;
+export const statusScheme = z.enum(statuses).brand<'Status'>();
+export type Status = z.infer<typeof statusScheme>;
+
+export const contactLogSchema = requestBodySchema.extend({
+	id: z.string().uuid(),
+	receivedAt: z.string().datetime(),
+	status: statusScheme
+});
+export type ContactLog = z.infer<typeof contactLogSchema>;

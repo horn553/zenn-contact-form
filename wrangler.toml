@@ -9,11 +9,27 @@ binding = "KV"
 id = "6653db06adad47b39dd539b60abe5e6c"
 preview_id = "6653db06adad47b39dd539b60abe5e6c"
 
+[[d1_databases]]
+binding = "DB"
+database_name = "zenn-contact-form"
+database_id = "931be2fb-7a5c-4155-8c22-8534b80c5410"
+
 # プレビュー環境
 [[env.preview.kv_namespaces]]
 binding = "KV"
 id = "95ae2b54ae2f4977a23f144e2eb575ef"
 
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "zenn-contact-form"
+database_id = "931be2fb-7a5c-4155-8c22-8534b80c5410"
+
+# プロダクション環境
 [[env.production.kv_namespaces]]
 binding = "KV"
 id = "353de8673ca54e078cfdc52b6735947c"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "zenn-contact-form-production"
+database_id = "20e85731-7775-44dd-8f25-85340144d34b"
