@@ -1,4 +1,5 @@
 import type { Actions, PageServerLoad } from './$types';
+import { sendEmail } from './emailSender';
 import { log } from './logger';
 import { verifyCaptcha } from './reCapthaVerifier';
 import {
@@ -85,6 +86,7 @@ export const actions = {
 		}
 
 		// TODO: メールを送信
+		sendEmail(requestBody);
 
 		currentStatus = 'have sent email';
 		contactLog.status = statusScheme.parse(currentStatus);
